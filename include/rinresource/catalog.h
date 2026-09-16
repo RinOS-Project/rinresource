@@ -189,8 +189,10 @@ rin_resource_catalog_find(const RinResourceCatalogV1* catalog, uint16_t type,
 {
     uint32_t index;
     RinResourceCatalogStatus status;
-    if (entry_out == 0 || !rin_resource_catalog_type_valid(type) ||
-        resource_id == 0u) return RIN_RESOURCE_CATALOG_INVALID_ARGUMENT;
+    if (entry_out == 0) return RIN_RESOURCE_CATALOG_INVALID_ARGUMENT;
+    *entry_out = 0;
+    if (!rin_resource_catalog_type_valid(type) || resource_id == 0u)
+        return RIN_RESOURCE_CATALOG_INVALID_ARGUMENT;
     status = rin_resource_catalog_validate(catalog);
     if (status != RIN_RESOURCE_CATALOG_OK) return status;
     for (index = 0u; index < catalog->entry_count; ++index) {
@@ -200,7 +202,6 @@ rin_resource_catalog_find(const RinResourceCatalogV1* catalog, uint16_t type,
             return RIN_RESOURCE_CATALOG_OK;
         }
     }
-    *entry_out = 0;
     return RIN_RESOURCE_CATALOG_NOT_FOUND;
 }
 
@@ -213,6 +214,8 @@ rin_resource_catalog_resolve_path(const RinResourceCatalogV1* catalog,
     const RinResourceCatalogEntryV1* entry = 0;
     RinResourceCatalogStatus status;
     if (path_out == 0) return RIN_RESOURCE_CATALOG_INVALID_ARGUMENT;
+    *path_out = 0;
+    if (path_size_out != 0) *path_size_out = 0u;
     status = rin_resource_catalog_find(catalog, type, resource_id, &entry);
     if (status != RIN_RESOURCE_CATALOG_OK) return status;
     if ((entry->flags & RIN_RESOURCE_CATALOG_SOURCE_PATH) == 0u)
@@ -232,6 +235,8 @@ rin_resource_catalog_resolve_blob(const RinResourceCatalogV1* catalog,
     RinResourceCatalogStatus status;
     if (data_out == 0 || data_size_out == 0)
         return RIN_RESOURCE_CATALOG_INVALID_ARGUMENT;
+    *data_out = 0;
+    *data_size_out = 0u;
     status = rin_resource_catalog_find(catalog, type, resource_id, &entry);
     if (status != RIN_RESOURCE_CATALOG_OK) return status;
     if ((entry->flags & RIN_RESOURCE_CATALOG_SOURCE_BLOB) == 0u)
